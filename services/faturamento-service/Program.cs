@@ -76,7 +76,7 @@ static void EnsureDatabaseCreatedWithRetry(IServiceProvider services, ILogger lo
             Thread.Sleep(TimeSpan.FromSeconds(5));
         }
     }
-    
+
     throw new InvalidOperationException("Nao foi possivel inicializar o banco de dados do faturamento.");
 }
 
@@ -116,6 +116,26 @@ public class ItemNota
     public int Quantidade { get; set; }
 }
 
+public class NotaFiscalRequest
+{
+    public int Numero { get; set; }
+    public List<ItemNotaRequest> Itens { get; set; } = new();
+}
+
+public class ItemNotaRequest
+{
+    public int ProdutoId { get; set; }
+    public int Quantidade { get; set; }
+}
+
+public class ProdutoEstoqueResponse
+{
+    public int Id { get; set; }
+    public string Codigo { get; set; } = string.Empty;
+    public string Descricao { get; set; } = string.Empty;
+    public int Saldo { get; set; }
+}
+
 public class FaturamentoDbContext : DbContext
 {
     public FaturamentoDbContext(DbContextOptions<FaturamentoDbContext> options)
@@ -141,9 +161,38 @@ public class NotasController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar(NotaFiscal nota)
+    public async Task<IActionResult> Criar([FromBody] NotaFiscalRequest request)
     {
-        nota.Status = "Aberta";
+        if (request.Numero <= 0)
+            return BadRequest("Numero da nota deve ser maior que zero.");
+
+        if (request.Itens == null || request.Itens.Count == 0)
+            return BadRequest("A nota deve possuir ao menos um item.");
+
+        if (request.Itens.Any(item => item.ProdutoId <= 0 || item.Quantidade <= 0))
+            return BadRequest("Produto e quantidade devem ser maiores que zero.");
+
+        var produtos = await ObterProdutosEstoqueAsync();
+        if (produtos == null)
+            return StatusCode(StatusCodes.Status502BadGateway, "Nao foi possivel validar os produtos no estoque.");
+
+        var produtosPorId = produtos.ToDictionary(produto => produto.Id);
+        var produtoInexistente = request.Itens.FirstOrDefault(item => !produtosPorId.ContainsKey(item.ProdutoId));
+
+        if (produtoInexistente != null)
+            return BadRequest($"Produto {produtoInexistente.ProdutoId} nao encontrado.");
+
+        var nota = new NotaFiscal
+        {
+            Numero = request.Numero,
+            Status = "Aberta",
+            Itens = request.Itens.Select(item => new ItemNota
+            {
+                ProdutoId = item.ProdutoId,
+                Quantidade = item.Quantidade
+            }).ToList()
+        };
+
         _context.Notas.Add(nota);
         await _context.SaveChangesAsync();
         return Ok(nota);
@@ -170,9 +219,10 @@ public class NotasController : ControllerBase
             return NotFound();
 
         if (nota.Status != "Aberta")
-            return BadRequest("Nota já fechada");
+            return BadRequest("Nota ja fechada");
 
         var client = _factory.CreateClient("estoque");
+        var itensBaixados = new List<ItemNota>();
 
         foreach (var item in nota.Itens)
         {
@@ -184,17 +234,59 @@ public class NotasController : ControllerBase
 
             if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
+                var rollbackResult = await RestaurarEstoqueAsync(client, itensBaixados);
                 var detalhe = await response.Content.ReadAsStringAsync();
+
+                if (!rollbackResult)
+                    return StatusCode(StatusCodes.Status502BadGateway, "Falha ao reverter a baixa parcial do estoque.");
+
                 return BadRequest(string.IsNullOrWhiteSpace(detalhe) ? "Nao foi possivel baixar o estoque." : detalhe);
             }
 
             if (!response.IsSuccessStatusCode)
+            {
+                var rollbackResult = await RestaurarEstoqueAsync(client, itensBaixados);
+
+                if (!rollbackResult)
+                    return StatusCode(StatusCodes.Status502BadGateway, "Falha ao reverter a baixa parcial do estoque.");
+
                 return StatusCode(StatusCodes.Status502BadGateway, "Erro ao atualizar estoque");
+            }
+
+            itensBaixados.Add(item);
         }
 
         nota.Status = "Fechada";
         await _context.SaveChangesAsync();
 
         return Ok("Nota impressa");
+    }
+
+    private async Task<List<ProdutoEstoqueResponse>?> ObterProdutosEstoqueAsync()
+    {
+        var client = _factory.CreateClient("estoque");
+        using var response = await client.GetAsync("/api/produtos");
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await response.Content.ReadFromJsonAsync<List<ProdutoEstoqueResponse>>();
+    }
+
+    private static async Task<bool> RestaurarEstoqueAsync(HttpClient client, IEnumerable<ItemNota> itens)
+    {
+        foreach (var item in itens.Reverse())
+        {
+            var response = await client.PostAsJsonAsync("/api/produtos/repor", new
+            {
+                produtoId = item.ProdutoId,
+                quantidade = item.Quantidade
+            });
+
+            if (!response.IsSuccessStatusCode)
+                return false;
+        }
+
+        return true;
     }
 }

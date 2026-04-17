@@ -98,6 +98,13 @@ public class Produto
     public int Saldo { get; set; }
 }
 
+public class ProdutoRequest
+{
+    public string Codigo { get; set; } = string.Empty;
+    public string Descricao { get; set; } = string.Empty;
+    public int Saldo { get; set; }
+}
+
 public class ItemRequest
 {
     public int ProdutoId { get; set; }
@@ -127,8 +134,24 @@ public class ProdutosController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar(Produto produto)
+    public async Task<IActionResult> Criar([FromBody] ProdutoRequest request)
     {
+        var codigo = request.Codigo.Trim();
+        var descricao = request.Descricao.Trim();
+
+        if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(descricao))
+            return BadRequest("Codigo e descricao sao obrigatorios.");
+
+        if (request.Saldo < 0)
+            return BadRequest("Saldo inicial nao pode ser negativo.");
+
+        var produto = new Produto
+        {
+            Codigo = codigo,
+            Descricao = descricao,
+            Saldo = request.Saldo
+        };
+
         _context.Produtos.Add(produto);
         await _context.SaveChangesAsync();
         return Ok(produto);
@@ -144,12 +167,32 @@ public class ProdutosController : ControllerBase
     [HttpPost("baixar")]
     public async Task<IActionResult> Baixar([FromBody] ItemRequest item)
     {
+        if (item.ProdutoId <= 0 || item.Quantidade <= 0)
+            return BadRequest("Produto e quantidade devem ser maiores que zero.");
+
         var produto = await _context.Produtos.FindAsync(item.ProdutoId);
 
         if (produto == null || produto.Saldo < item.Quantidade)
             return BadRequest("Estoque insuficiente");
 
         produto.Saldo -= item.Quantidade;
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [HttpPost("repor")]
+    public async Task<IActionResult> Repor([FromBody] ItemRequest item)
+    {
+        if (item.ProdutoId <= 0 || item.Quantidade <= 0)
+            return BadRequest("Produto e quantidade devem ser maiores que zero.");
+
+        var produto = await _context.Produtos.FindAsync(item.ProdutoId);
+
+        if (produto == null)
+            return NotFound("Produto nao encontrado.");
+
+        produto.Saldo += item.Quantidade;
         await _context.SaveChangesAsync();
 
         return Ok();
