@@ -51,7 +51,7 @@ O projeto foi organizado da seguinte forma:
 
 O ambiente é inicializado com Docker Compose, possibilitando subir frontend, microsserviços e banco de dados de forma integrada.
 
-## Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 ### Frontend
 

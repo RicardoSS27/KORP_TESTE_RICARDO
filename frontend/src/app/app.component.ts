@@ -167,8 +167,15 @@ export class AppComponent implements OnInit {
       .pipe(finalize(() => { this.imprimindoNotaId = null; }))
       .subscribe({
         next: () => {
-          this.carregarDashboard();
-          this.notaMessage = { type: 'success', text: `Nota ${id} impressa e fechada com sucesso.` };
+          this.notaMessage = { type: 'info', text: `Atualizando dados da nota ${id}...` };
+          this.carregarDashboard(
+            () => {
+              this.notaMessage = { type: 'success', text: `Nota ${id} impressa e fechada com sucesso.` };
+            },
+            () => {
+              this.notaMessage = { type: 'error', text: `Nota ${id} foi impressa, mas nao foi possivel atualizar a tela.` };
+            }
+          );
         },
         error: (error: HttpErrorResponse) => {
           const detalhe = this.extrairMensagemErro(error);
@@ -194,7 +201,7 @@ export class AppComponent implements OnInit {
     return this.produtos.find((produto) => produto.id === produtoId)?.descricao ?? `Produto ${produtoId}`;
   }
 
-  private carregarDashboard(): void {
+  private carregarDashboard(onSuccess?: () => void, onError?: () => void): void {
     forkJoin({
       produtos: this.api.listarProdutos(),
       notas: this.api.listarNotas()
@@ -202,6 +209,7 @@ export class AppComponent implements OnInit {
       next: ({ produtos, notas }) => {
         this.produtos = produtos;
         this.notas = notas;
+        onSuccess?.();
       },
       error: () => {
         if (!this.produtos.length) {
@@ -211,6 +219,8 @@ export class AppComponent implements OnInit {
         if (!this.notas.length) {
           this.notaMessage = { type: 'error', text: 'Nao foi possivel carregar as notas fiscais.' };
         }
+
+        onError?.();
       }
     });
   }
