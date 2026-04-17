@@ -156,9 +156,7 @@ Além disso, no serviço de faturamento foi utilizada uma política de retry com
 
 ### Uso de LINQ no C#
 
-Sim, houve uso de LINQ, especialmente nas consultas realizadas com Entity Framework Core.
-
-Os principais usos observados foram:
+Os principais usos foram:
 
 - `FirstOrDefaultAsync(...)`: busca de nota fiscal por identificador;
 - `Include(...)`: carregamento dos itens relacionados a cada nota fiscal;
