@@ -1,0 +1,181 @@
+<main>
+  <section class="hero">
+    <p class="eyebrow">Operacao integrada</p>
+    <h1>Sistema de Notas Fiscais</h1>
+    <p class="hero-copy">
+      Cadastre produtos, monte notas fiscais com itens do estoque e feche a nota com baixa automatica.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <strong>{{ produtos.length }}</strong>
+        <span>produtos cadastrados</span>
+      </div>
+      <div class="stat">
+        <strong>{{ notas.length }}</strong>
+        <span>notas registradas</span>
+      </div>
+      <div class="stat">
+        <strong>{{ totalNotasAbertas }}</strong>
+        <span>notas em aberto</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Produtos</h2>
+          <p>Cadastro simples para abastecer o estoque usado pelas notas.</p>
+        </div>
+      </div>
+
+      <div class="message" [class.active]="produtoMessage" [class.success]="produtoMessage?.type === 'success'"
+        [class.error]="produtoMessage?.type === 'error'" [class.info]="produtoMessage?.type === 'info'">
+        {{ produtoMessage?.text ?? '' }}
+      </div>
+
+      <div class="form-grid">
+        <label>
+          Codigo
+          <input [(ngModel)]="codigo" name="codigo" placeholder="Ex.: CAM-001">
+        </label>
+        <label>
+          Descricao
+          <input [(ngModel)]="descricao" name="descricao" placeholder="Ex.: Camiseta basica">
+        </label>
+        <label>
+          Saldo inicial
+          <input [(ngModel)]="saldo" name="saldo" type="number" min="0" placeholder="Ex.: 15">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="button" (click)="criarProduto()" [disabled]="salvandoProduto">Salvar produto</button>
+        <button type="button" class="secondary" (click)="carregarProdutos(true)">Atualizar lista</button>
+      </div>
+
+      <div class="card-header section-gap">
+        <div>
+          <h3>Estoque disponivel</h3>
+          <p>Esses produtos alimentam os itens da nota fiscal.</p>
+        </div>
+      </div>
+
+      <div class="list" *ngIf="produtos.length; else semProdutos">
+        <article class="list-item" *ngFor="let produto of produtos">
+          <strong>{{ produto.descricao }}</strong>
+          <div class="item-meta">
+            <span>Codigo: {{ produto.codigo }}</span>
+            <span>Saldo: {{ produto.saldo }}</span>
+            <span>ID: {{ produto.id }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2>Nova nota fiscal</h2>
+          <p>Monte a nota escolhendo produtos ja cadastrados.</p>
+        </div>
+      </div>
+
+      <div class="message" [class.active]="notaMessage" [class.success]="notaMessage?.type === 'success'"
+        [class.error]="notaMessage?.type === 'error'" [class.info]="notaMessage?.type === 'info'">
+        {{ notaMessage?.text ?? '' }}
+      </div>
+
+      <form class="nota-form" (ngSubmit)="criarNota()">
+        <label>
+          Numero da nota
+          <input [(ngModel)]="numeroNota" name="numeroNota" type="number" min="1" placeholder="Ex.: 1001">
+        </label>
+
+        <div>
+          <div class="actions item-header">
+            <h3>Itens da nota</h3>
+            <button type="button" class="secondary" (click)="adicionarItemNota()">Adicionar item</button>
+          </div>
+          <div class="nota-items" *ngIf="itensNota.length; else semItens">
+            <div class="nota-item-row" *ngFor="let item of itensNota">
+              <label>
+                Produto
+                <select [(ngModel)]="item.produtoId" [name]="'produto-' + item.itemId">
+                  <option [ngValue]="null">Selecione um produto</option>
+                  <option *ngFor="let produto of produtos" [ngValue]="produto.id">
+                    {{ produto.descricao }} | saldo {{ produto.saldo }} | id {{ produto.id }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                Quantidade
+                <input [(ngModel)]="item.quantidade" [name]="'quantidade-' + item.itemId" type="number" min="1"
+                  placeholder="Ex.: 2">
+              </label>
+              <button type="button" class="secondary" (click)="removerItemNota(item.itemId)">Remover</button>
+            </div>
+          </div>
+          <p class="nota-item-info">
+            {{ itensNota.length ? itensNota.length + ' item(ns) pronto(s) para a nota.' : 'Adicione ao menos um item para criar a nota.' }}
+          </p>
+        </div>
+
+        <div class="actions">
+          <button type="submit" [disabled]="salvandoNota">Salvar nota</button>
+          <button type="button" class="secondary" (click)="carregarNotas(true)">Atualizar notas</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <section class="card section-stack">
+    <div class="card-header">
+      <div>
+        <h2>Notas fiscais</h2>
+        <p>Notas abertas podem ser impressas para baixar estoque e serem fechadas.</p>
+      </div>
+    </div>
+
+    <div class="list" *ngIf="notasOrdenadas.length; else semNotas">
+      <article class="list-item" *ngFor="let nota of notasOrdenadas">
+        <div class="nota-card-header">
+          <div>
+            <h4>Nota #{{ nota.numero }}</h4>
+            <div class="item-meta">
+              <span>ID: {{ nota.id }}</span>
+              <span>{{ nota.itens.length }} item(ns)</span>
+            </div>
+          </div>
+          <span class="badge" [class.badge-open]="nota.status === 'Aberta'" [class.badge-closed]="nota.status === 'Fechada'">
+            {{ nota.status }}
+          </span>
+        </div>
+        <ul class="nota-card-items">
+          <li *ngFor="let item of nota.itens">
+            {{ produtoDescricao(item.produtoId) }} - Quantidade: {{ item.quantidade }}
+          </li>
+        </ul>
+        <div class="actions">
+          <button type="button" (click)="imprimirNota(nota.id)"
+            [disabled]="nota.status === 'Fechada' || imprimindoNotaId === nota.id">
+            {{ nota.status === 'Fechada' ? 'Nota fechada' : (imprimindoNotaId === nota.id ? 'Imprimindo...' : 'Imprimir nota') }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<ng-template #semProdutos>
+  <div class="empty">Nenhum produto cadastrado ainda.</div>
+</ng-template>
+
+<ng-template #semItens>
+  <div class="empty">Cadastre produtos antes de montar a nota.</div>
+</ng-template>
+
+<ng-template #semNotas>
+  <div class="empty">Nenhuma nota fiscal cadastrada ate agora.</div>
+</ng-template>

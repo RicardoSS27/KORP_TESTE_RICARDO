@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Notas Fiscais</title>
+  <style>
+    :root {
+      --panel: rgba(255, 252, 247, 0.92);
+      --panel-strong: #fffaf2;
+      --border: rgba(95, 67, 39, 0.18);
+      --text: #2f2419;
+      --muted: #6c5a45;
+      --accent: #b85c38;
+      --accent-dark: #8f4325;
+      --ok: #2f855a;
+      --warn: #c05621;
+      --shadow: 0 20px 50px rgba(64, 38, 14, 0.12);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 214, 170, 0.75), transparent 32%),
+        radial-gradient(circle at right, rgba(216, 180, 116, 0.45), transparent 28%),
+        linear-gradient(160deg, #f7f1e8 0%, #f0e1cd 52%, #ead2b7 100%);
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 40px;
+    }
+
+    .hero {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(255, 248, 239, 0.98), rgba(252, 235, 214, 0.92));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+
+    h1, h2, h3, h4, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(95, 67, 39, 0.1);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.7rem;
+      margin-bottom: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card-header p {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .nota-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(95, 67, 39, 0.18);
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(184, 92, 56, 0.68);
+      box-shadow: 0 0 0 4px rgba(184, 92, 56, 0.14);
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 18px;
+      background: var(--accent);
+      color: #fffaf4;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      background: rgba(95, 67, 39, 0.08);
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background: rgba(95, 67, 39, 0.14);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .message {
+      min-height: 24px;
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .message.active {
+      background: rgba(255, 255, 255, 0.62);
+    }
+
+    .message.success {
+      color: var(--ok);
+      background: rgba(47, 133, 90, 0.1);
+    }
+
+    .message.error {
+      color: #9b2c2c;
+      background: rgba(155, 44, 44, 0.12);
+    }
+
+    .message.info {
+      color: var(--warn);
+      background: rgba(192, 86, 33, 0.1);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-item {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(95, 67, 39, 0.12);
+    }
+
+    .list-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed rgba(95, 67, 39, 0.26);
+      border-radius: 18px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .nota-items {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nota-item-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(110px, 0.7fr) auto;
+      gap: 10px;
+      align-items: end;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(95, 67, 39, 0.12);
+    }
+
+    .nota-item-info {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .badge-open {
+      color: #975a16;
+      background: rgba(236, 201, 75, 0.24);
+    }
+
+    .badge-closed {
+      color: #276749;
+      background: rgba(72, 187, 120, 0.18);
+    }
+
+    .nota-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .nota-card-header h4 {
+      margin-bottom: 4px;
+    }
+
+    .nota-card-items {
+      margin: 0 0 12px;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .nota-card-items li + li {
+      margin-top: 6px;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .form-grid,
+      .nota-item-row {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        width: min(100% - 24px, 1120px);
+      }
+
+      .hero,
+      .card {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Operacao integrada</p>
+      <h1>Sistema de Notas Fiscais</h1>
+      <p class="hero-copy">
+        Cadastre produtos, monte notas fiscais com itens do estoque e feche a nota com baixa automatica.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <strong id="statProdutos">0</strong>
+          <span>produtos cadastrados</span>
+        </div>
+        <div class="stat">
+          <strong id="statNotas">0</strong>
+          <span>notas registradas</span>
+        </div>
+        <div class="stat">
+          <strong id="statAbertas">0</strong>
+          <span>notas em aberto</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Produtos</h2>
+            <p>Cadastro simples para abastecer o estoque usado pelas notas.</p>
+          </div>
+        </div>
+
+        <div id="mensagemProduto" class="message"></div>
+
+        <div class="form-grid">
+          <label>
+            Codigo
+            <input id="codigo" placeholder="Ex.: CAM-001">
+          </label>
+          <label>
+            Descricao
+            <input id="descricao" placeholder="Ex.: Camiseta basica">
+          </label>
+          <label>
+            Saldo inicial
+            <input id="saldo" type="number" min="0" placeholder="Ex.: 15">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="btnSalvarProduto" type="button">Salvar produto</button>
+          <button id="btnAtualizarProdutos" type="button" class="secondary">Atualizar lista</button>
+        </div>
+
+        <div class="card-header" style="margin-top: 22px;">
+          <div>
+            <h3>Estoque disponivel</h3>
+            <p>Esses produtos alimentam os itens da nota fiscal.</p>
+          </div>
+        </div>
+
+        <div id="listaProdutos" class="list"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Nova nota fiscal</h2>
+            <p>Monte a nota escolhendo produtos ja cadastrados.</p>
+          </div>
+        </div>
+
+        <div id="mensagemNota" class="message"></div>
+
+        <form id="formNota" class="nota-form">
+          <label>
+            Numero da nota
+            <input id="numeroNota" type="number" min="1" placeholder="Ex.: 1001">
+          </label>
+
+          <div>
+            <div class="actions" style="justify-content: space-between; margin-bottom: 10px;">
+              <h3 style="margin-bottom: 0;">Itens da nota</h3>
+              <button id="btnAdicionarItem" type="button" class="secondary">Adicionar item</button>
+            </div>
+            <div id="itensNota" class="nota-items"></div>
+            <p id="ajudaItens" class="nota-item-info">Adicione ao menos um item para criar a nota.</p>
+          </div>
+
+          <div class="actions">
+            <button id="btnSalvarNota" type="submit">Salvar nota</button>
+            <button id="btnAtualizarNotas" type="button" class="secondary">Atualizar notas</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top: 18px;">
+      <div class="card-header">
+        <div>
+          <h2>Notas fiscais</h2>
+          <p>Notas abertas podem ser impressas para baixar estoque e serem fechadas.</p>
+        </div>
+      </div>
+      <div id="listaNotas" class="list"></div>
+    </section>
+  </main>
+
+  <script>
+    const apiEstoque = 'http://localhost:5001/api/produtos';
+    const apiNotas = 'http://localhost:5002/api/notas';
+
+    let produtos = [];
+    let notas = [];
+    let itemCounter = 0;
+
+    const elementos = {
+      mensagemProduto: document.getElementById('mensagemProduto'),
+      mensagemNota: document.getElementById('mensagemNota'),
+      listaProdutos: document.getElementById('listaProdutos'),
+      listaNotas: document.getElementById('listaNotas'),
+      itensNota: document.getElementById('itensNota'),
+      ajudaItens: document.getElementById('ajudaItens'),
+      numeroNota: document.getElementById('numeroNota'),
+      codigo: document.getElementById('codigo'),
+      descricao: document.getElementById('descricao'),
+      saldo: document.getElementById('saldo'),
+      statProdutos: document.getElementById('statProdutos'),
+      statNotas: document.getElementById('statNotas'),
+      statAbertas: document.getElementById('statAbertas'),
+      btnSalvarProduto: document.getElementById('btnSalvarProduto'),
+      btnSalvarNota: document.getElementById('btnSalvarNota')
+    };
+
+    document.getElementById('btnSalvarProduto').addEventListener('click', criarProduto);
+    document.getElementById('btnAtualizarProdutos').addEventListener('click', () => carregarProdutos(true));
+    document.getElementById('btnAdicionarItem').addEventListener('click', adicionarItemNota);
+    document.getElementById('btnAtualizarNotas').addEventListener('click', () => carregarNotas(true));
+    document.getElementById('formNota').addEventListener('submit', criarNota);
+
+    function setMensagem(tipo, texto, alvo) {
+      alvo.textContent = texto || '';
+      alvo.className = 'message';
+      if (texto) {
+        alvo.classList.add('active', tipo);
+      }
+    }
+
+    function atualizarEstatisticas() {
+      elementos.statProdutos.textContent = produtos.length;
+      elementos.statNotas.textContent = notas.length;
+      elementos.statAbertas.textContent = notas.filter(nota => nota.status === 'Aberta').length;
+    }
+
+    function renderProdutos() {
+      if (!produtos.length) {
+        elementos.listaProdutos.innerHTML = '<div class="empty">Nenhum produto cadastrado ainda.</div>';
+        return;
+      }
+
+      elementos.listaProdutos.innerHTML = produtos
+        .map(produto => `
+          <article class="list-item">
+            <strong>${escapeHtml(produto.descricao)}</strong>
+            <div class="item-meta">
+              <span>Codigo: ${escapeHtml(produto.codigo)}</span>
+              <span>Saldo: ${produto.saldo}</span>
+              <span>ID: ${produto.id}</span>
+            </div>
+          </article>
+        `)
+        .join('');
+    }
+
+    function renderNotas() {
+      if (!notas.length) {
+        elementos.listaNotas.innerHTML = '<div class="empty">Nenhuma nota fiscal cadastrada ate agora.</div>';
+        return;
+      }
+
+      elementos.listaNotas.innerHTML = notas
+        .slice()
+        .sort((a, b) => b.id - a.id)
+        .map(nota => {
+          const badgeClass = nota.status === 'Fechada' ? 'badge badge-closed' : 'badge badge-open';
+          const itens = (nota.itens || [])
+            .map(item => {
+              const produto = produtos.find(prod => prod.id === item.produtoId);
+              const nome = produto ? produto.descricao : `Produto ${item.produtoId}`;
+              return `<li>${escapeHtml(nome)} - Quantidade: ${item.quantidade}</li>`;
+            })
+            .join('');
+
+          return `
+            <article class="list-item">
+              <div class="nota-card-header">
+                <div>
+                  <h4>Nota #${nota.numero}</h4>
+                  <div class="item-meta">
+                    <span>ID: ${nota.id}</span>
+                    <span>${(nota.itens || []).length} item(ns)</span>
+                  </div>
+                </div>
+                <span class="${badgeClass}">${escapeHtml(nota.status)}</span>
+              </div>
+              <ul class="nota-card-items">${itens || '<li>Sem itens</li>'}</ul>
+              <div class="actions">
+                <button type="button" ${nota.status === 'Fechada' ? 'disabled' : ''} onclick="imprimirNota(${nota.id})">
+                  ${nota.status === 'Fechada' ? 'Nota fechada' : 'Imprimir nota'}
+                </button>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+    }
+
+    function criarLinhaItem(itemId) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'nota-item-row';
+      wrapper.dataset.itemId = itemId;
+      wrapper.innerHTML = `
+        <label>
+          Produto
+          <select class="item-produto"></select>
+        </label>
+        <label>
+          Quantidade
+          <input class="item-quantidade" type="number" min="1" placeholder="Ex.: 2">
+        </label>
+        <button type="button" class="secondary">Remover</button>
+      `;
+
+      wrapper.querySelector('button').addEventListener('click', () => {
+        wrapper.remove();
+        atualizarAjudaItens();
+      });
+
+      elementos.itensNota.appendChild(wrapper);
+      preencherSelectProdutos(wrapper.querySelector('select'));
+      atualizarAjudaItens();
+    }
+
+    function preencherSelectProdutos(select) {
+      if (!produtos.length) {
+        select.innerHTML = '<option value="">Cadastre produtos antes</option>';
+        select.disabled = true;
+        return;
+      }
+
+      select.disabled = false;
+      select.innerHTML = `
+        <option value="">Selecione um produto</option>
+        ${produtos.map(produto => `
+          <option value="${produto.id}">
+            ${escapeHtml(produto.descricao)} | saldo ${produto.saldo} | id ${produto.id}
+          </option>
+        `).join('')}
+      `;
+    }
+
+    function atualizarSelectsProdutos() {
+      document.querySelectorAll('.item-produto').forEach(preencherSelectProdutos);
+    }
+
+    function adicionarItemNota() {
+      itemCounter += 1;
+      criarLinhaItem(itemCounter);
+    }
+
+    function atualizarAjudaItens() {
+      const quantidade = document.querySelectorAll('.nota-item-row').length;
+      elementos.ajudaItens.textContent = quantidade
+        ? `${quantidade} item(ns) pronto(s) para a nota.`
+        : 'Adicione ao menos um item para criar a nota.';
+    }
+
+    function limparFormularioProduto() {
+      elementos.codigo.value = '';
+      elementos.descricao.value = '';
+      elementos.saldo.value = '';
+    }
+
+    function limparFormularioNota() {
+      elementos.numeroNota.value = '';
+      elementos.itensNota.innerHTML = '';
+      itemCounter = 0;
+      adicionarItemNota();
+    }
+
+    function coletarItensNota() {
+      const linhas = [...document.querySelectorAll('.nota-item-row')];
+      return linhas.map(linha => ({
+        produtoId: Number(linha.querySelector('.item-produto').value),
+        quantidade: Number(linha.querySelector('.item-quantidade').value)
+      }));
+    }
+
+    async function carregarProdutos(exibirMensagem = false) {
+      try {
+        const response = await fetch(apiEstoque);
+        if (!response.ok) {
+          throw new Error('Falha ao carregar produtos.');
+        }
+
+        produtos = await response.json();
+        renderProdutos();
+        atualizarSelectsProdutos();
+        atualizarEstatisticas();
+
+        if (exibirMensagem) {
+          setMensagem('success', 'Lista de produtos atualizada.', elementos.mensagemProduto);
+        }
+      } catch (error) {
+        console.error(error);
+        setMensagem('error', 'Nao foi possivel carregar os produtos.', elementos.mensagemProduto);
+      }
+    }
+
+    async function carregarNotas(exibirMensagem = false) {
+      try {
+        const response = await fetch(apiNotas);
+        if (!response.ok) {
+          throw new Error('Falha ao carregar notas.');
+        }
+
+        notas = await response.json();
+        renderNotas();
+        atualizarEstatisticas();
+
+        if (exibirMensagem) {
+          setMensagem('success', 'Lista de notas atualizada.', elementos.mensagemNota);
+        }
+      } catch (error) {
+        console.error(error);
+        setMensagem('error', 'Nao foi possivel carregar as notas fiscais.', elementos.mensagemNota);
+      }
+    }
+
+    async function criarProduto() {
+      const codigo = elementos.codigo.value.trim();
+      const descricao = elementos.descricao.value.trim();
+      const saldo = Number(elementos.saldo.value);
+
+      if (!codigo || !descricao || !Number.isInteger(saldo) || saldo < 0) {
+        setMensagem('info', 'Preencha codigo, descricao e saldo inicial valido.', elementos.mensagemProduto);
+        return;
+      }
+
+      elementos.btnSalvarProduto.disabled = true;
+      setMensagem('info', 'Salvando produto...', elementos.mensagemProduto);
+
+      try {
+        const response = await fetch(apiEstoque, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo, descricao, saldo })
+        });
+
+        if (!response.ok) {
+          throw new Error('Falha ao salvar produto.');
+        }
+
+        limparFormularioProduto();
+        await carregarProdutos();
+        setMensagem('success', 'Produto salvo com sucesso.', elementos.mensagemProduto);
+      } catch (error) {
+        console.error(error);
+        setMensagem('error', 'Nao foi possivel salvar o produto.', elementos.mensagemProduto);
+      } finally {
+        elementos.btnSalvarProduto.disabled = false;
+      }
+    }
+
+    async function criarNota(event) {
+      event.preventDefault();
+
+      const numero = Number(elementos.numeroNota.value);
+      const itens = coletarItensNota();
+
+      if (!Number.isInteger(numero) || numero <= 0) {
+        setMensagem('info', 'Informe um numero valido para a nota.', elementos.mensagemNota);
+        return;
+      }
+
+      if (!itens.length) {
+        setMensagem('info', 'Adicione ao menos um item para criar a nota.', elementos.mensagemNota);
+        return;
+      }
+
+      const itensInvalidos = itens.some(item =>
+        !Number.isInteger(item.produtoId) ||
+        item.produtoId <= 0 ||
+        !Number.isInteger(item.quantidade) ||
+        item.quantidade <= 0
+      );
+
+      if (itensInvalidos) {
+        setMensagem('info', 'Selecione um produto e quantidade valida em todos os itens.', elementos.mensagemNota);
+        return;
+      }
+
+      elementos.btnSalvarNota.disabled = true;
+      setMensagem('info', 'Salvando nota fiscal...', elementos.mensagemNota);
+
+      try {
+        const response = await fetch(apiNotas, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numero, itens })
+        });
+
+        if (!response.ok) {
+          throw new Error('Falha ao salvar nota.');
+        }
+
+        limparFormularioNota();
+        await Promise.all([carregarProdutos(), carregarNotas()]);
+        setMensagem('success', 'Nota fiscal criada com sucesso.', elementos.mensagemNota);
+      } catch (error) {
+        console.error(error);
+        setMensagem('error', 'Nao foi possivel salvar a nota fiscal.', elementos.mensagemNota);
+      } finally {
+        elementos.btnSalvarNota.disabled = false;
+      }
+    }
+
+    async function imprimirNota(id) {
+      setMensagem('info', `Imprimindo nota ${id}...`, elementos.mensagemNota);
+
+      try {
+        const response = await fetch(`${apiNotas}/${id}/imprimir`, {
+          method: 'POST'
+        });
+
+        if (!response.ok) {
+          const detalhe = await response.text();
+          throw new Error(detalhe || 'Falha ao imprimir nota.');
+        }
+
+        await Promise.all([carregarProdutos(), carregarNotas()]);
+        setMensagem('success', `Nota ${id} impressa e fechada com sucesso.`, elementos.mensagemNota);
+      } catch (error) {
+        console.error(error);
+        setMensagem('error', `Nao foi possivel imprimir a nota ${id}. ${error.message}`, elementos.mensagemNota);
+      }
+    }
+
+    function escapeHtml(valor) {
+      return String(valor ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    window.imprimirNota = imprimirNota;
+
+    adicionarItemNota();
+    Promise.all([carregarProdutos(), carregarNotas()]);
+  </script>
+</body>
+</html>

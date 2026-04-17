@@ -1,0 +1,43 @@
+services:
+  estoque:
+    build: ./services/estoque-service
+    ports:
+      - "5001:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=sqlserver;Database=EstoqueDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True
+
+  faturamento:
+    build: ./services/faturamento-service
+    ports:
+      - "5002:8080"
+    depends_on:
+      - sqlserver
+      - estoque
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=sqlserver;Database=FaturamentoDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True
+      - Services__EstoqueBaseUrl=http://estoque:8080
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Your_password123
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - faturamento
+      - estoque
+
+volumes:
+  mssql_data:
