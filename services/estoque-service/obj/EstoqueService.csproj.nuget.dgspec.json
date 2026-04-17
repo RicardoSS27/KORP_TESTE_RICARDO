@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj": {}
+    "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj": {}
   },
   "projects": {
-    "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj": {
+    "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
+        "projectUniqueName": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
         "projectName": "EstoqueService",
-        "projectPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
+        "projectPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
         "packagesPath": "C:\\Users\\SUPORTE\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\obj\\",
+        "outputPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\SUPORTE\\AppData\\Roaming\\NuGet\\NuGet.Config"

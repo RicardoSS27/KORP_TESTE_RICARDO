@@ -4957,11 +4957,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\FaturamentoService.csproj",
+      "projectUniqueName": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\FaturamentoService.csproj",
       "projectName": "FaturamentoService",
-      "projectPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\FaturamentoService.csproj",
+      "projectPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\FaturamentoService.csproj",
       "packagesPath": "C:\\Users\\SUPORTE\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\obj\\",
+      "outputPath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\faturamento-service\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\SUPORTE\\AppData\\Roaming\\NuGet\\NuGet.Config"

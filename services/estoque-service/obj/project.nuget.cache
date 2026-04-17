@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Xcuk4DDu1JA=",
+  "dgSpecHash": "BkW9QtHWA8s=",
   "success": true,
-  "projectFilePath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
+  "projectFilePath": "C:\\Users\\SUPORTE\\OneDrive\\Documentos\\Programação\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\KORP_TESTE_RICARDO\\services\\estoque-service\\EstoqueService.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\SUPORTE\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\SUPORTE\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
